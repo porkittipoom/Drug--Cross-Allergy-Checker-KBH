@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drug Cross-Allergy Checker KBH</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col text-slate-800">
+
+  <!-- Header -->
+  <header class="bg-teal-700 text-white shadow-lg border-b border-teal-800 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-2">
+      <div class="flex items-center space-x-3">
+        <div class="bg-white/10 p-2.5 rounded-xl backdrop-blur-md border border-white/20">
+          <i class="fa-solid fa-notes-medical text-2xl text-teal-200"></i>
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Drug Cross-Allergy Checker KBH</h1>
+          <p class="text-xs text-teal-100/80">ระบบสนับสนุนการตัดสินใจและตรวจสอบการแพ้ยาข้ามกลุ่ม (Clinical Decision Support Tool)</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2 text-xs bg-teal-800/60 px-3 py-1.5 rounded-lg border border-teal-600/30">
+        <i class="fa-solid fa-shield-halved text-emerald-300"></i>
+        <span>Clinical Guidance Version 2.0</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="mb-6">
+      <label class="block text-sm font-semibold text-slate-700 mb-2">เลือกกลุ่มยาที่ต้องการประเมิน (Select Drug Category):</label>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2" id="drugTabContainer"></div>
+    </div>
+    <div id="appContent" class="space-y-6"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800 text-slate-400 py-4 border-t border-slate-700 text-xs mt-auto">
+    <div class="max-w-7xl mx-auto px-4 text-center sm:flex sm:justify-between text-slate-400">
+      <p>© 2026 Drug Cross-Allergy Checker KBH. For Professional Healthcare Use Only.</p>
+      <p>ระบบสนับสนุนการตัดสินใจทางคลินิก การตัดสินใจขึ้นกับดุลยพินิจของแพทย์และเภสัชกร</p>
+    </div>
+  </footer>
+
+  <script>
+    const drugData = {
+      betalactam: {
+        id: "betalactam", name: "1. Beta-lactams", icon: "fa-capsules",
+        desc: "การแพ้ข้ามกลุ่มในยาปฏิชีวนะ Beta-lactam (Penicillins, Cephalosporins, Carbapenems)",
+        drugs: [
+          "AMOXICILLIN", "AMPICILLIN", "CLOXACILLIN", "PENICILLIN", "PIPERACILLIN",
+          "CEFADROXIL", "CEFAZOLIN", "CEPHALEXIN", "CEFOXITIN", "CEFPROZIL",
+          "CEFUROXIME", "CEFIXIME", "CEFOTAXIME", "CEFTAZIDIME", "CEFTRIAXONE",
+          "CEFEPIME", "ERTAPENEM", "IMIPENEM", "MEROPENEM"
+        ],
+        matrix: {
+          "AMOXICILLIN": { "AMPICILLIN": "X1", "CLOXACILLIN": "X5", "PENICILLIN": "X4", "PIPERACILLIN": "X3", "CEFADROXIL": "X1", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "X1", "CEFOXITIN": "SAFE", "CEFPROZIL": "X2", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "AMPICILLIN": { "AMOXICILLIN": "X1", "CLOXACILLIN": "X5", "PENICILLIN": "X4", "PIPERACILLIN": "X3", "CEFADROXIL": "X2", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "X2", "CEFOXITIN": "SAFE", "CEFPROZIL": "X2", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "CLOXACILLIN": { "AMOXICILLIN": "X5", "AMPICILLIN": "X5", "PENICILLIN": "X5", "PIPERACILLIN": "X5", "CEFADROXIL": "SAFE", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "SAFE", "CEFOXITIN": "SAFE", "CEFPROZIL": "SAFE", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "PENICILLIN": { "AMOXICILLIN": "X4", "AMPICILLIN": "X4", "CLOXACILLIN": "X5", "PIPERACILLIN": "X5", "CEFADROXIL": "SAFE", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "X3", "CEFOXITIN": "SAFE", "CEFPROZIL": "SAFE", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "PIPERACILLIN": { "AMOXICILLIN": "X3", "AMPICILLIN": "X3", "CLOXACILLIN": "X5", "PENICILLIN": "X5", "CEFADROXIL": "X3", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "X3", "CEFOXITIN": "X3", "CEFPROZIL": "X3", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "CEFADROXIL": { "AMOXICILLIN": "X1", "AMPICILLIN": "X2", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "X3", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "X1", "CEFOXITIN": "X3", "CEFPROZIL": "X2", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "CEFAZOLIN": { "AMOXICILLIN": "SAFE", "AMPICILLIN": "SAFE", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "SAFE", "CEFADROXIL": "SAFE", "CEPHALEXIN": "SAFE", "CEFOXITIN": "SAFE", "CEFPROZIL": "SAFE", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "CEPHALEXIN": { "AMOXICILLIN": "X1", "AMPICILLIN": "X2", "CLOXACILLIN": "SAFE", "PENICILLIN": "X3", "PIPERACILLIN": "X3", "CEFADROXIL": "X1", "CEFAZOLIN": "SAFE", "CEFOXITIN": "SAFE", "CEFPROZIL": "X2", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "CEFOXITIN": { "AMOXICILLIN": "SAFE", "AMPICILLIN": "SAFE", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "X3", "CEFADROXIL": "X3", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "SAFE", "CEFPROZIL": "X2", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "CEFPROZIL": { "AMOXICILLIN": "X2", "AMPICILLIN": "X2", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "X3", "CEFADROXIL": "X2", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "X2", "CEFOXITIN": "X2", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "CEFUROXIME": { "AMOXICILLIN": "SAFE", "AMPICILLIN": "SAFE", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "SAFE", "CEFADROXIL": "SAFE", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "SAFE", "CEFOXITIN": "SAFE", "CEFPROZIL": "SAFE", "CEFIXIME": "X3", "CEFOTAXIME": "X1", "CEFTAZIDIME": "X3", "CEFTRIAXONE": "X1", "CEFEPIME": "X2", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "CEFIXIME": { "AMOXICILLIN": "SAFE", "AMPICILLIN": "SAFE", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "SAFE", "CEFADROXIL": "SAFE", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "SAFE", "CEFOXITIN": "SAFE", "CEFPROZIL": "SAFE", "CEFUROXIME": "X3", "CEFOTAXIME": "X3", "CEFTAZIDIME": "X3", "CEFTRIAXONE": "X3", "CEFEPIME": "X3", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "CEFOTAXIME": { "AMOXICILLIN": "SAFE", "AMPICILLIN": "SAFE", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "SAFE", "CEFADROXIL": "SAFE", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "SAFE", "CEFOXITIN": "SAFE", "CEFPROZIL": "SAFE", "CEFUROXIME": "X1", "CEFIXIME": "X3", "CEFTAZIDIME": "X3", "CEFTRIAXONE": "X1", "CEFEPIME": "X1", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "CEFTAZIDIME": { "AMOXICILLIN": "SAFE", "AMPICILLIN": "SAFE", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "SAFE", "CEFADROXIL": "SAFE", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "SAFE", "CEFOXITIN": "SAFE", "CEFPROZIL": "SAFE", "CEFUROXIME": "X3", "CEFIXIME": "X3", "CEFOTAXIME": "X3", "CEFTRIAXONE": "X3", "CEFEPIME": "X3", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "CEFTRIAXONE": { "AMOXICILLIN": "SAFE", "AMPICILLIN": "SAFE", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "SAFE", "CEFADROXIL": "SAFE", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "SAFE", "CEFOXITIN": "SAFE", "CEFPROZIL": "SAFE", "CEFUROXIME": "X1", "CEFIXIME": "X3", "CEFOTAXIME": "X1", "CEFTAZIDIME": "X3", "CEFEPIME": "X1", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "CEFEPIME": { "AMOXICILLIN": "SAFE", "AMPICILLIN": "SAFE", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "SAFE", "CEFADROXIL": "SAFE", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "SAFE", "CEFOXITIN": "SAFE", "CEFPROZIL": "SAFE", "CEFUROXIME": "X2", "CEFIXIME": "X3", "CEFOTAXIME": "X1", "CEFTAZIDIME": "X3", "CEFTRIAXONE": "X1", "ERTAPENEM": "SAFE", "IMIPENEM": "SAFE", "MEROPENEM": "SAFE" },
+          "ERTAPENEM": { "AMOXICILLIN": "SAFE", "AMPICILLIN": "SAFE", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "SAFE", "CEFADROXIL": "SAFE", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "SAFE", "CEFOXITIN": "SAFE", "CEFPROZIL": "SAFE", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "IMIPENEM": "X5", "MEROPENEM": "X5" },
+          "IMIPENEM": { "AMOXICILLIN": "SAFE", "AMPICILLIN": "SAFE", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "SAFE", "CEFADROXIL": "SAFE", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "SAFE", "CEFOXITIN": "SAFE", "CEFPROZIL": "SAFE", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "ERTAPENEM": "X5", "MEROPENEM": "X5" },
+          "MEROPENEM": { "AMOXICILLIN": "SAFE", "AMPICILLIN": "SAFE", "CLOXACILLIN": "SAFE", "PENICILLIN": "SAFE", "PIPERACILLIN": "SAFE", "CEFADROXIL": "SAFE", "CEFAZOLIN": "SAFE", "CEPHALEXIN": "SAFE", "CEFOXITIN": "SAFE", "CEFPROZIL": "SAFE", "CEFUROXIME": "SAFE", "CEFIXIME": "SAFE", "CEFOTAXIME": "SAFE", "CEFTAZIDIME": "SAFE", "CEFTRIAXONE": "SAFE", "CEFEPIME": "SAFE", "ERTAPENEM": "X5", "IMIPENEM": "X5" }
+        },
+        riskTypes: {
+          "X1": { title: "Same side chain (DO NOT PRESCRIBE)", color: "bg-red-500 text-white", desc: "มีหลักฐานทางคลินิกยืนยันการแพ้ข้ามกลุ่มจากโครงสร้างสายข้างเดียวกัน" },
+          "X2": { title: "Same side chain - Theoretical (DO NOT PRESCRIBE)", color: "bg-red-400 text-white", desc: "สายข้างเหมือนกัน มีความเสี่ยงทางทฤษฎี แม้ไม่มีศึกษารองรับ" },
+          "X3": { title: "Similar side chain (DO NOT PRESCRIBE)", color: "bg-orange-500 text-white", desc: "โครงสร้างสายข้างคล้ายคลึงกัน มีโอกาสแพ้ข้ามกลุ่ม" },
+          "X4": { title: "Beta-lactam ring reaction (DO NOT PRESCRIBE)", color: "bg-rose-600 text-white", desc: "มีหลักฐานการแพ้ผ่านวง Beta-lactam ring" },
+          "X5": { title: "Beta-lactam ring risk (DO NOT PRESCRIBE)", color: "bg-rose-400 text-white", desc: "ความเสี่ยงทางทฤษฎีจากการแพ้ Beta-lactam ring" },
+          "SAFE": { title: "Different structure (CONSIDERED SAFE)", color: "bg-emerald-600 text-white", desc: "โครงสร้างต่างกัน พิจารณาว่าปลอดภัยที่จะสั่งใช้" }
+        },
+        severeConditions: [
+          "ผู้ป่วยเข้า ICU ที่เกี่ยวเนื่องจากการแพ้ยา",
+          "Delayed severe reaction: Interstitial nephritis, Hepatitis, Hemolytic anemia",
+          "Delayed severe cutaneous adverse reactions (SCARs): SJS, TEN, Exfoliative dermatitis, AGEP, DRESS"
+        ]
+      },
+      nsaids: {
+        id: "nsaids", name: "2. NSAIDs", icon: "fa-pills",
+        desc: "การแพ้ยาข้ามกลุ่มในกลุ่มยาต้านการอักเสบที่ไม่ใช่สเตียรอยด์ (NSAIDs Hypersensitivity)",
+        drugs: [
+          "Aspirin", "Diflunisal", "Salsalate", "Diclofenac", "Etodolac", "Indomethacin", 
+          "Ketorolac", "Nabumetone", "Sulindac", "Ibuprofen", "Ketoprofen", "Naproxen", 
+          "Flurbiprofen", "Fenoprofen", "Loxoprofen", "Esflurbiprofen", "Mefenamic acid", 
+          "Meclofenamate", "Piroxicam", "Meloxicam", "Tenoxicam", "Nimesulide", 
+          "Celecoxib", "Etoricoxib", "Parecoxib", "Lumiracoxib", "Paracetamol"
+        ],
+        drugDetails: {
+          "Aspirin": { group: "Salicylates", cox: "nonSelective" },
+          "Diflunisal": { group: "Salicylates", cox: "nonSelective" },
+          "Salsalate": { group: "Salicylates", cox: "nonSelective" },
+          "Diclofenac": { group: "Acetic acid", cox: "nonSelective" },
+          "Etodolac": { group: "Acetic acid", cox: "nonSelective" },
+          "Indomethacin": { group: "Acetic acid", cox: "nonSelective" },
+          "Ketorolac": { group: "Acetic acid", cox: "nonSelective" },
+          "Nabumetone": { group: "Acetic acid", cox: "nonSelective" },
+          "Sulindac": { group: "Acetic acid", cox: "nonSelective" },
+          "Ibuprofen": { group: "Propionic acid", cox: "nonSelective" },
+          "Ketoprofen": { group: "Propionic acid", cox: "nonSelective" },
+          "Naproxen": { group: "Propionic acid", cox: "nonSelective" },
+          "Flurbiprofen": { group: "Propionic acid", cox: "nonSelective" },
+          "Fenoprofen": { group: "Propionic acid", cox: "nonSelective" },
+          "Loxoprofen": { group: "Propionic acid", cox: "nonSelective" },
+          "Esflurbiprofen": { group: "Propionic acid", cox: "nonSelective" },
+          "Mefenamic acid": { group: "Fenamates", cox: "nonSelective" },
+          "Meclofenamate": { group: "Fenamates", cox: "nonSelective" },
+          "Piroxicam": { group: "Enolic acid", cox: "nonSelective" },
+          "Tenoxicam": { group: "Enolic acid", cox: "nonSelective" },
+          "Meloxicam": { group: "Enolic acid", cox: "selectiveCox2" },
+          "Nimesulide": { group: "Sulfonanilide", cox: "selectiveCox2" },
+          "Celecoxib": { group: "Diaryl heterocyclic", cox: "specificCox2" },
+          "Etoricoxib": { group: "Diaryl heterocyclic", cox: "specificCox2" },
+          "Parecoxib": { group: "Diaryl heterocyclic", cox: "specificCox2" },
+          "Lumiracoxib": { group: "Diaryl heterocyclic", cox: "specificCox2" },
+          "Paracetamol": { group: "Para-aminophenol", cox: "paracetamol" }
+        }
+      },
+      sulfonamides: {
+        id: "sulfonamides", name: "3. Sulfonamides", icon: "fa-bacteria",
+        desc: "การแพ้ข้ามกลุ่มยา Sulfonamides (Antibiotics vs Non-antibiotics)",
+        drugs: [
+          "Sulfamethoxazole", "Silver Zinc Sulfadiazine", "Sulfapyridine (Sulfasalazine)", 
+          "Sulfanilamide", "Sulfadiazine", "Sulfadoxine", "Sulfaguanidine", "Phthalylsulfathiazole",
+          "Celecoxib", "Parecoxib", "Darunavir", "Furosemide", "Hydrochlorothiazide", "Glibenclamide"
+        ],
+        atbList: ["Sulfamethoxazole", "Silver Zinc Sulfadiazine", "Sulfapyridine (Sulfasalazine)", "Sulfanilamide", "Sulfadiazine", "Sulfadoxine", "Sulfaguanidine", "Phthalylsulfathiazole"],
+        nonAtbList: ["Celecoxib", "Parecoxib", "Darunavir", "Furosemide", "Hydrochlorothiazide", "Glibenclamide"]
+      },
+      fluoroquinolones: {
+        id: "fluoroquinolones", name: "4. Fluoroquinolones", icon: "fa-prescription-bottle-medical",
+        desc: "แนวทางประเมินการแพ้ข้ามกลุ่ม Fluoroquinolones แบ่งตาม Generation",
+        drugs: [
+          "Nalidixic acid", "Cinoxacin", "Oxolinic acid", "Pipemidic acid",
+          "Norfloxacin", "Enoxacin", "Ciprofloxacin", "Lomefloxacin", "Ofloxacin", "Pefloxacin", "Fleroxacin",
+          "Levofloxacin", "Gatifloxacin", "Sparfloxacin",
+          "Gemifloxacin", "Moxifloxacin", "Trovafloxacin", "Prulifloxacin", "Sitafloxacin"
+        ]
+      },
+      aeds: {
+        id: "aeds", name: "5. Anti-epileptics (AEDs)", icon: "fa-brain",
+        desc: "การแพ้ข้ามกลุ่มยากันชัก (Anti-epileptic drugs hypersensitivity)",
+        drugs: [
+          "Carbamazepine", "Oxcarbazepine", "Phenobarbital", "Phenytoin", "Fosphenytoin", 
+          "Lamotrigine", "Zonisamide", "Perampanel", "Lacosamide",
+          "Clobazam", "Clonazepam", "Diazepam", "Nitrazepam",
+          "Levetiracetam", "Sodium valproate", "Topiramate", "Gabapentin", "Pregabalin", "Vigabatrin", "Rufinamide"
+        ],
+        aromatic: ["Carbamazepine", "Oxcarbazepine", "Phenobarbital", "Phenytoin", "Fosphenytoin", "Lamotrigine", "Zonisamide", "Perampanel", "Lacosamide"],
+        nonAromaticSimilar: ["Clobazam", "Clonazepam", "Diazepam", "Nitrazepam"],
+        nonAromaticDifferent: ["Levetiracetam", "Sodium valproate", "Topiramate", "Gabapentin", "Pregabalin", "Vigabatrin", "Rufinamide"]
+      },
+      icm: {
+        id: "icm", name: "6. Iodinated Contrast (ICM)", icon: "fa-x-ray",
+        desc: "การแพ้ข้ามกลุ่มสารทึบรังสีที่มีไอโอดีน (Iodinated Contrast Media Hypersensitivity)",
+        drugs: [
+          "Iodixanol", "Iohexol", "Ioversol", "Iomeprol", "Iopamidol", "Iopromide",
+          "Iobitridol", "Ioxaglate", "Amidotrizoate", "Iothalamate", "Iopanoic acid", "Diatrizoate"
+        ]
+      },
+      corticosteroids: {
+        id: "corticosteroids", name: "7. Corticosteroids", icon: "fa-syringe",
+        desc: "การแบ่งกลุ่ม Glucocorticosteroids ตามโครงสร้างเคมีและการแพ้ข้ามกลุ่ม",
+        drugs: [
+          "Hydrocortisone", "Hydrocortisone acetate", "Methylprednisolone", "Prednisone", "Prednisolone", "Prednisolone acetate", "Prednisolone caproate", "Fludrocortisone acetate", "Tixocortol pivalate", "Cortisone acetate",
+          "Triamcinolone Acetonide", "Budesonide", "Triamcinolone", "Desonide", "Fluocinonide", "Fluocinolone acetonide", "Amcinonide", "Flunisolide", "Halcinonide",
+          "Betamethasone", "Dexamethasone", "Desoxymethasone", "Desoximetasone", "Fluocortolone", "Fluocortolone and esters", "Halomethasone", "Fluprednidene acetate", "Fluticasone",
+          "Beclomethasone dipropionate", "Betamethasone dipropionate", "Betamethasone-17-valerate", "Clobetasol propionate", "Clobetasone butyrate", "Diflorasone diacetate", "Mometasone furoate", "Fluticasone Propionate", "Diflucortolone valerate", "Alclometasone-17,21-dipropionate",
+          "Methylprednisolone aceponate", "Hydrocortisone valerate", "Hydrocortisone-17-butyrate", "Hydrocortisone-17-buteprate", "Hydrocortisone-17-aceponate", "Prednicarbate"
+        ],
+        groups: {
+          "Group A": ["Hydrocortisone", "Hydrocortisone acetate", "Methylprednisolone", "Prednisone", "Prednisolone", "Prednisolone acetate", "Prednisolone caproate", "Fludrocortisone acetate", "Tixocortol pivalate", "Cortisone acetate"],
+          "Group B": ["Triamcinolone Acetonide", "Budesonide", "Triamcinolone", "Desonide", "Fluocinonide", "Fluocinolone acetonide", "Amcinonide", "Flunisolide", "Halcinonide"],
+          "Group C": ["Betamethasone", "Dexamethasone", "Desoxymethasone", "Desoximetasone", "Fluocortolone", "Fluocortolone and esters", "Halomethasone", "Fluprednidene acetate", "Fluticasone"],
+          "Group D1": ["Beclomethasone dipropionate", "Betamethasone dipropionate", "Betamethasone-17-valerate", "Clobetasol propionate", "Clobetasone butyrate", "Diflorasone diacetate", "Mometasone furoate", "Fluticasone Propionate", "Diflucortolone valerate", "Alclometasone-17,21-dipropionate"],
+          "Group D2": ["Methylprednisolone aceponate", "Hydrocortisone valerate", "Hydrocortisone-17-butyrate", "Hydrocortisone-17-buteprate", "Hydrocortisone-17-aceponate", "Prednicarbate"]
+        }
+      },
+      ppis: {
+        id: "ppis", name: "8. PPIs", icon: "fa-pills",
+        desc: "การจัดการผู้ป่วยที่มีประวัติสงสัยแพ้ยากลุ่ม Proton Pump Inhibitors (PPIs)",
+        drugs: ["Omeprazole", "Esomeprazole", "Lansoprazole", "Pantoprazole", "Rabeprazole"]
+      },
+      antihistamines: {
+        id: "antihistamines", name: "9. Antihistamines", icon: "fa-tablets",
+        desc: "การแบ่งกลุ่ม H1-Antagonists ตามโครงสร้างทางเคมี และประเมินการแพ้ข้ามกลุ่ม",
+        drugs: [
+          "Brompheniramine", "Chlorpheniramine", "Dexchlorpheniramine", "Pheniramine", "Dimethindene", "Triprolidine", "Acrivastine",
+          "Carbinoxamine", "Clemastine", "Dimenhydrinate", "Diphenhydramine", "Doxylamine",
+          "Antazoline", "Pyrilamine", "Tripelename",
+          "Buclizine", "Cyclizine", "Meclizine", "Oxatomide", "Hydroxyzine", "Cetirizine", "Levocetirizine",
+          "Promethazine", "Mequitazine", "Trimeprazine",
+          "Azatadine", "Ketotifen", "Cyproheptadine", "Loratadine", "Ebastine", "Terfenadine", "Levocabastine", "Mizolastine", "Rupatadine", "Desloratadine", "Bilastine", "Fexofenadine"
+        ],
+        chemicalGroups: {
+          "Alkylamines": ["Brompheniramine", "Chlorpheniramine", "Dexchlorpheniramine", "Pheniramine", "Dimethindene", "Triprolidine", "Acrivastine"],
+          "Ethanolamines": ["Carbinoxamine", "Clemastine", "Dimenhydrinate", "Diphenhydramine", "Doxylamine"],
+          "Ethylenediamines": ["Antazoline", "Pyrilamine", "Tripelename"],
+          "Piperazines": ["Buclizine", "Cyclizine", "Meclizine", "Oxatomide", "Hydroxyzine", "Cetirizine", "Levocetirizine"],
+          "Phenothiazines": ["Promethazine", "Mequitazine", "Trimeprazine"],
+          "Piperidines": ["Azatadine", "Ketotifen", "Cyproheptadine", "Loratadine", "Ebastine", "Terfenadine", "Levocabastine", "Mizolastine", "Rupatadine", "Desloratadine", "Bilastine", "Fexofenadine"]
+        }
+      },
+      musclerelaxants: {
+        id: "musclerelaxants", name: "10. Muscle Relaxants", icon: "fa-child",
+        desc: "การประเมินการแพ้ยากลุ่ม Oral Muscle Relaxants (Piperidine vs Ethanolamine)",
+        drugs: ["Tolperisone", "Eperisone", "Orphenadrine"]
+      }
+    };
+
+    let activeTab = "betalactam";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderTabs();
+      renderContent();
+    });
+
+    function renderTabs() {
+      const container = document.getElementById("drugTabContainer");
+      container.innerHTML = Object.keys(drugData).map(key => {
+        const group = drugData[key];
+        const isActive = activeTab === key;
+        return `
+          <button onclick="switchTab('${key}')" class="flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all duration-200 ${
+            isActive 
+              ? "bg-teal-600 text-white border-teal-600 shadow-md ring-2 ring-teal-300" 
+              : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900"
+          }">
+            <i class="fa-solid ${group.icon} text-base mb-1 ${isActive ? "text-teal-100" : "text-teal-600"}"></i>
+            <span class="text-xs font-semibold leading-tight">${group.name}</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function switchTab(tabKey) {
+      activeTab = tabKey;
+      renderTabs();
+      renderContent();
+    }
+
+    function renderContent() {
+      const container = document.getElementById("appContent");
+      const data = drugData[activeTab];
+
+      if (activeTab === "betalactam") renderBetaLactam(container, data);
+      else if (activeTab === "nsaids") renderNSAIDs(container, data);
+      else if (activeTab === "sulfonamides") renderSulfonamides(container, data);
+      else if (activeTab === "fluoroquinolones") renderFluoroquinolones(container, data);
+      else if (activeTab === "aeds") renderAEDs(container, data);
+      else if (activeTab === "icm") renderICM(container, data);
+      else if (activeTab === "corticosteroids") renderCorticosteroids(container, data);
+      else if (activeTab === "ppis") renderPPIs(container, data);
+      else if (activeTab === "antihistamines") renderAntihistamines(container, data);
+      else if (activeTab === "musclerelaxants") renderMuscleRelaxants(container, data);
+    }
+
+    // --- Render Functions ---
+
+    function renderBetaLactam(container, data) {
+      const drugs = data.drugs;
+      
+      let matrixHeader = `<tr class="bg-teal-800 text-white"><th class="p-2 border border-teal-700 bg-teal-800 text-white sticky top-0 left-0 z-30 min-w-[120px] text-center shadow"></th>`;
+      drugs.forEach(d => {
+        matrixHeader += `<th class="p-2 border border-teal-700 bg-teal-700 text-white text-[10px] font-bold whitespace-nowrap min-w-[75px] text-center sticky top-0 z-20">${d}</th>`;
+      });
+      matrixHeader += `</tr>`;
+
+      let matrixBody = "";
+      drugs.forEach(culprit => {
+        matrixBody += `<tr><td class="p-2 border border-slate-200 bg-teal-700 text-white font-bold text-[10px] whitespace-nowrap sticky left-0 z-20 shadow-sm">${culprit}</td>`;
+        drugs.forEach(target => {
+          if (culprit === target) {
+            matrixBody += `<td class="p-2 border border-slate-200 bg-slate-200 text-center font-bold text-[10px] text-slate-500">-</td>`;
+          } else {
+            const resKey = data.matrix[culprit]?.[target] || "SAFE";
+            if (resKey === "SAFE") {
+              matrixBody += `<td class="p-1 border border-slate-200 text-center text-xs"><span class="text-emerald-600 font-bold" title="Safe">✓</span></td>`;
+            } else {
+              let badgeClass = "bg-red-500 text-white font-bold";
+              if (resKey === "X3" || resKey === "X5") badgeClass = "bg-orange-400 text-white font-bold";
+              matrixBody += `<td class="p-1 border border-slate-200 text-center text-[10px]"><span class="px-1.5 py-0.5 rounded ${badgeClass}">${resKey}</span></td>`;
+            }
+          }
+        });
+        matrixBody += `</tr>`;
+      });
+
+      container.innerHTML = `
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="bg-teal-100 text-teal-700 p-3 rounded-xl"><i class="fa-solid ${data.icon} text-xl"></i></div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">${data.name} Cross-Allergy Checker</h2>
+              <p class="text-xs text-slate-500">${data.desc}</p>
+            </div>
+          </div>
+
+          <div class="bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-xl mb-6">
+            <h4 class="text-sm font-bold text-rose-800"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>AVOID ALL beta-lactam antibiotics if:</h4>
+            <ul class="list-disc list-inside text-xs text-rose-700 space-y-1 mt-1">
+              ${data.severeConditions.map(c => `<li>${c}</li>`).join("")}
+            </ul>
+          </div>
+
+          <!-- Dropdowns -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">1. ยาที่ผู้ป่วยมีประวัติแพ้:</label>
+              <select id="culpritBeta" onchange="checkBetaCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <option value="">-- เลือกรายการยาที่แพ้ --</option>
+                ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">2. ยาที่ต้องการสั่งใช้:</label>
+              <select id="targetBeta" onchange="checkBetaCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <option value="">-- เลือกรายการยาที่ต้องการใช้ --</option>
+                ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+
+          <div id="betaResult" class="hidden mb-6 p-4 rounded-xl border"></div>
+
+          <!-- Interactive Matrix Table with 2D Freeze Scrolling -->
+          <div class="mt-8 border-t border-slate-200 pt-6">
+            <h3 class="text-sm font-bold text-slate-700 mb-3 flex items-center">
+              <i class="fa-solid fa-table-cells text-teal-600 mr-2"></i>ตาราง Interactive Beta-Lactam Cross-Allergy Matrix
+            </h3>
+            <div class="overflow-auto custom-scrollbar border border-slate-200 rounded-xl shadow-sm max-h-[500px]">
+              <table class="w-full text-xs text-left border-collapse min-w-[1100px]">
+                <thead>${matrixHeader}</thead>
+                <tbody class="divide-y divide-slate-200 bg-white">${matrixBody}</tbody>
+              </table>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-3 text-[11px] text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <span class="flex items-center"><span class="w-3 h-3 bg-red-500 rounded mr-1"></span> X1, X2, X4: High Risk (Do Not Prescribe)</span>
+              <span class="flex items-center"><span class="w-3 h-3 bg-orange-400 rounded mr-1"></span> X3, X5: Moderate/Theoretical Risk</span>
+              <span class="flex items-center"><span class="text-emerald-600 font-bold mr-1 text-sm">✓</span> Considered Safe</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function checkBetaCross() {
+      const culprit = document.getElementById("culpritBeta").value;
+      const target = document.getElementById("targetBeta").value;
+      const resultDiv = document.getElementById("betaResult");
+
+      if (!culprit || !target) { resultDiv.classList.add("hidden"); return; }
+      resultDiv.classList.remove("hidden");
+
+      if (culprit === target) {
+        resultDiv.className = "p-4 rounded-xl border bg-rose-100 border-rose-300 text-rose-800";
+        resultDiv.innerHTML = `<div class="font-bold"><i class="fa-solid fa-ban mr-2"></i>SAME DRUG REACTION</div><div class="text-xs mt-1">ยาชนิดเดียวกัน ห้ามสั่งใช้</div>`;
+        return;
+      }
+
+      const resKey = drugData.betalactam.matrix[culprit]?.[target] || "SAFE";
+      const risk = drugData.betalactam.riskTypes[resKey];
+
+      if (resKey === "SAFE") {
+        resultDiv.className = "p-4 rounded-xl border bg-emerald-50 border-emerald-300 text-emerald-800";
+        resultDiv.innerHTML = `<div class="font-bold"><i class="fa-solid fa-circle-check mr-2"></i>CONSIDERED SAFE TO PRESCRIBE</div><div class="text-xs mt-1"><strong>${culprit}</strong> และ <strong>${target}</strong> มีโครงสร้างต่างกัน สามารถพิจารณาใช้ได้อย่างปลอดภัย</div>`;
+      } else {
+        resultDiv.className = "p-4 rounded-xl border bg-rose-50 border-rose-300 text-rose-900";
+        resultDiv.innerHTML = `<div class="font-bold text-rose-800"><i class="fa-solid fa-triangle-exclamation mr-2"></i>${risk.title} (${resKey})</div><div class="text-xs mt-1">${risk.desc} - ห้ามสั่งใช้ <strong>${target}</strong> ในผู้ป่วยแพ้ <strong>${culprit}</strong></div>`;
+      }
+    }
+
+    function renderNSAIDs(container, data) {
+      container.innerHTML = `
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="bg-teal-100 text-teal-700 p-3 rounded-xl"><i class="fa-solid ${data.icon} text-xl"></i></div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">${data.name} Hypersensitivity Assessment</h2>
+              <p class="text-xs text-slate-500">${data.desc}</p>
+            </div>
+          </div>
+
+          <!-- Dropdown Section -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">1. ยาที่ผู้ป่วยมีประวัติแพ้:</label>
+                <select id="culpritNSAID" onchange="checkNSAIDCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือกรายการยา NSAIDs ที่แพ้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">2. ยาที่ต้องการสั่งใช้:</label>
+                <select id="targetNSAID" onchange="checkNSAIDCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือกรายการยา NSAIDs ที่ต้องการใช้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">3. ระบุรูปแบบ/กลไกการแพ้ (Pathophysiology / Mechanism):</label>
+              <select id="mechanismNSAID" onchange="checkNSAIDCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <option value="pseudo">Pseudoallergy (มีผื่น/หอบหืด/แน่นหน้าอก จากการยับยั้ง COX-1 เช่น NECD, NIUA, NERD)</option>
+                <option value="type1">True Allergy: IgE-mediated / Immediate (Type I - เช่น SNIUAA Urticaria/Angioedema/Anaphylaxis)</option>
+                <option value="type4">True Allergy: T-cell mediated / Delayed (Type IV - เช่น SNIDR Delayed Reaction)</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="nsaidResult" class="hidden mb-6 p-4 rounded-xl border"></div>
+
+          <!-- NSAIDs Reference Style Structure UI -->
+          <div class="mt-8 border-t border-slate-200 pt-6 space-y-6">
+            <h3 class="text-sm font-bold text-slate-700 flex items-center">
+              <i class="fa-solid fa-sitemap text-teal-600 mr-2"></i>ตารางกลุ่มยาและโครงสร้าง NSAIDs
+            </h3>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Left Column: Classification by Chemical Structure -->
+              <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-4">
+                <h4 class="text-xs font-bold text-teal-800 flex items-center border-b pb-2">
+                  <i class="fa-solid fa-layer-group text-teal-600 mr-1.5"></i>Classification by Chemical Structure
+                </h4>
+                
+                <div class="bg-white border border-slate-200 rounded-lg p-3 shadow-2xs space-y-1">
+                  <span class="text-xs font-bold text-teal-900">Salicylates:</span>
+                  <p class="text-xs text-slate-600">Aspirin, Diflunisal, Salsalate</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-lg p-3 shadow-2xs space-y-1">
+                  <span class="text-xs font-bold text-teal-900">Acetic acid:</span>
+                  <p class="text-xs text-slate-600">Diclofenac, Etodolac, Indomethacin, Ketorolac, Nabumetone, Sulindac</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-lg p-3 shadow-2xs space-y-1">
+                  <span class="text-xs font-bold text-teal-900">Propionic acid:</span>
+                  <p class="text-xs text-slate-600">Ibuprofen, Ketoprofen, Naproxen, Flurbiprofen, Fenoprofen, Loxoprofen, Esflurbiprofen</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-lg p-3 shadow-2xs space-y-1">
+                  <span class="text-xs font-bold text-teal-900">Fenamates:</span>
+                  <p class="text-xs text-slate-600">Meclofenamate, Mefenamic acid</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-lg p-3 shadow-2xs space-y-1">
+                  <span class="text-xs font-bold text-teal-900">Enolic acid (Oxicams):</span>
+                  <p class="text-xs text-slate-600">Piroxicam, Meloxicam, Tenoxicam</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-lg p-3 shadow-2xs space-y-1">
+                  <span class="text-xs font-bold text-teal-900">Diaryl heterocyclic (COX-2 selective):</span>
+                  <p class="text-xs text-slate-600">Celecoxib, Etoricoxib, Parecoxib, Lumiracoxib</p>
+                </div>
+              </div>
+
+              <!-- Right Column: Classification by COX-1 Inhibitors Capacity -->
+              <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-4">
+                <h4 class="text-xs font-bold text-teal-800 flex items-center border-b pb-2">
+                  <i class="fa-solid fa-chart-pie text-teal-600 mr-1.5"></i>Classification by COX-1 Inhibitors Capacity
+                </h4>
+
+                <div class="bg-rose-50 border border-rose-200 rounded-lg p-3 space-y-1">
+                  <span class="text-xs font-bold text-rose-800">Non-selective COX-I inhibitors:</span>
+                  <p class="text-xs text-rose-900/80">Aspirin, Diclofenac, Naproxen, Mefenamic acid, Indomethacin, Ketorolac, Sulindac, Ibuprofen, Piroxicam, Tenoxicam, Paracetamol > 1,000 mg</p>
+                </div>
+
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 space-y-1">
+                  <span class="text-xs font-bold text-amber-800">Selective COX-II inhibitors:</span>
+                  <p class="text-xs text-amber-900/80">Nimesulide, Meloxicam</p>
+                </div>
+
+                <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 space-y-1">
+                  <span class="text-xs font-bold text-emerald-800">Specific COX-II inhibitors:</span>
+                  <p class="text-xs text-emerald-900/80">Celecoxib, Etoricoxib, Parecoxib, Lumiracoxib</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function checkNSAIDCross() {
+      const culprit = document.getElementById("culpritNSAID").value;
+      const target = document.getElementById("targetNSAID").value;
+      const mech = document.getElementById("mechanismNSAID").value;
+      const resultDiv = document.getElementById("nsaidResult");
+
+      if (!culprit || !target) { resultDiv.classList.add("hidden"); return; }
+      resultDiv.classList.remove("hidden");
+
+      const cInfo = drugData.nsaids.drugDetails[culprit];
+      const tInfo = drugData.nsaids.drugDetails[target];
+
+      let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประมวลผลการแพ้ยา NSAIDs:</h4><div class="text-xs space-y-2">`;
+      html += `<p>• <strong>ยาที่ผู้ป่วยมีประวัติแพ้ (${culprit}):</strong> โครงสร้าง <em>${cInfo.group}</em> | กลไก <em>${cInfo.cox}</em></p>`;
+      html += `<p>• <strong>ยาที่ต้องการสั่งใช้ (${target}):</strong> โครงสร้าง <em>${tInfo.group}</em> | กลไก <em>${tInfo.cox}</em></p>`;
+
+      if (mech === "pseudo") {
+        if (tInfo.cox === "nonSelective") {
+          html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 ห้ามสั่งใช้! ผู้ป่วยมีกลไก Pseudoallergy (ยับยั้ง COX-1) ยา ${target} มีฤทธิ์ Non-selective COX-1 จะกระตุ้นการหลั่ง Histamine ให้เกิดผื่น/หอบหืดกำเริบได้</div>`;
+          html += `<div class="bg-emerald-50 text-emerald-800 p-2 rounded-lg mt-1 font-medium">💡 คำแนะนำ: หลีกเลี่ยง Conventional NSAIDs สามารถใช้ Specific COX-II (Celecoxib, Etoricoxib, Parecoxib, Lumiracoxib) และ Paracetamol ≤ 500 mg ได้</div>`;
+        } else if (tInfo.cox === "selectiveCox2") {
+          html += `<div class="bg-amber-100 text-amber-900 p-2.5 rounded-lg font-bold">⚠️ ใช้ด้วยความระมัดระวัง: ${target} มีฤทธิ์ Selective COX-2 อาจยังมีผลยับยั้ง COX-1 ได้เล็กน้อย</div>`;
+        } else if (tInfo.cox === "specificCox2" || tInfo.cox === "paracetamol") {
+          html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ ปลอดภัยที่จะพิจารณาสั่งใช้: ${target} เป็น Specific COX-II หรือ Paracetamol (≤ 500 mg) ไม่ยับยั้ง COX-1 จึงไม่กระตุ้น Pseudoallergy</div>`;
+        }
+      } else {
+        if (cInfo.group === tInfo.group) {
+          html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 ห้ามสั่งใช้! ผู้ป่วยเป็น True Allergy และยาอยู่ในกลุ่มโครงสร้างสารเคมีเดียวกัน (${cInfo.group}) มีความเสี่ยงแพ้ข้ามกลุ่มสูงมาก</div>`;
+        } else {
+          html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ ปลอดภัยที่จะพิจารณาสั่งใช้: ผู้ป่วยเป็น True Allergy Specific ตัวยา ยา ${target} อยู่ต่างกลุ่มโครงสร้างเคมี (${cInfo.group} vs ${tInfo.group}) ไม่แพ้ข้ามกลุ่ม</div>`;
+        }
+      }
+      html += `</div>`;
+
+      resultDiv.className = "p-4 rounded-xl border bg-slate-50 border-slate-300";
+      resultDiv.innerHTML = html;
+    }
+
+    function renderSulfonamides(container, data) {
+      container.innerHTML = `
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="bg-teal-100 text-teal-700 p-3 rounded-xl"><i class="fa-solid ${data.icon} text-xl"></i></div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">${data.name} Cross-Allergy Checker</h2>
+              <p class="text-xs text-slate-500">${data.desc}</p>
+            </div>
+          </div>
+
+          <!-- Dropdown Section -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">1. ยาที่ผู้ป่วยมีประวัติแพ้:</label>
+                <select id="culpritSulfa" onchange="checkSulfaCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือกรายการยา Sulfonamides ที่แพ้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">2. ยาที่ต้องการสั่งใช้:</label>
+                <select id="targetSulfa" onchange="checkSulfaCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือกรายการยา Sulfonamides ที่ต้องการใช้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">3. ระบุระดับความรุนแรงของอาการแพ้ (Severity Level):</label>
+              <select id="severitySulfa" onchange="checkSulfaCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <option value="severe">แพ้รุนแรงแบบ SCARs / Anaphylaxis (เช่น SJS, TEN, DRESS, AGEP, Anaphylaxis)</option>
+                <option value="nonSevere">แพ้แบบไม่รุนแรง (เช่น ผื่นลมพิษ Urticaria, MP rash)</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="sulfaResult" class="hidden mb-6 p-4 rounded-xl border"></div>
+
+          <!-- Sulfonamides Reference Style Structure UI -->
+          <div class="mt-8 border-t border-slate-200 pt-6 space-y-6">
+            <h3 class="text-sm font-bold text-slate-700 flex items-center">
+              <i class="fa-solid fa-sitemap text-teal-600 mr-2"></i>ตารางการจำแนกกลุ่ม Sulfonamides
+            </h3>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- ATBs Box -->
+              <div class="bg-rose-50 border border-rose-200 rounded-xl p-4 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold text-rose-800 flex items-center">
+                  <i class="fa-solid fa-pills text-rose-600 mr-1.5"></i>ยากลุ่ม Sulfonamide ATBs
+                </h4>
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Sulfamethoxazole</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Silver Zinc Sulfadiazine</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Sulfapyridine (Sulfasalazine)</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Sulfanilamide</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Sulfadiazine</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Sulfadoxine</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Sulfaguanidine</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Phthalylsulfathiazole</span>
+                </div>
+              </div>
+
+              <!-- Non-ATBs Box -->
+              <div class="bg-sky-50 border border-sky-200 rounded-xl p-4 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold text-sky-800 flex items-center">
+                  <i class="fa-solid fa-pills text-sky-600 mr-1.5"></i>ยากลุ่ม Sulfonamide non-ATBs
+                </h4>
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="bg-white border border-sky-200 text-sky-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Celecoxib</span>
+                  <span class="bg-white border border-sky-200 text-sky-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Parecoxib</span>
+                  <span class="bg-white border border-sky-200 text-sky-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Darunavir</span>
+                  <span class="bg-white border border-sky-200 text-sky-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Furosemide</span>
+                  <span class="bg-white border border-sky-200 text-sky-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Hydrochlorothiazide</span>
+                  <span class="bg-white border border-sky-200 text-sky-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Glibenclamide</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function checkSulfaCross() {
+      const culprit = document.getElementById("culpritSulfa").value;
+      const target = document.getElementById("targetSulfa").value;
+      const severity = document.getElementById("severitySulfa").value;
+      const resultDiv = document.getElementById("sulfaResult");
+
+      if (!culprit || !target) { resultDiv.classList.add("hidden"); return; }
+      resultDiv.classList.remove("hidden");
+
+      const isCulpritATB = drugData.sulfonamides.atbList.includes(culprit);
+      const isTargetATB = drugData.sulfonamides.atbList.includes(target);
+
+      let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประเมินโครงสร้างและระดับความรุนแรง:</h4><div class="text-xs space-y-2">`;
+      html += `<p>• <strong>ยาที่ผู้ป่วยมีประวัติแพ้:</strong> ${culprit} (${isCulpritATB ? "Sulfonamide ATB" : "Sulfonamide non-ATB"})</p>`;
+      html += `<p>• <strong>ยาที่ต้องการสั่งใช้:</strong> ${target} (${isTargetATB ? "Sulfonamide ATB" : "Sulfonamide non-ATB"})</p>`;
+
+      if (severity === "severe") {
+        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 ห้ามสั่งใช้! ผู้ป่วยมีประวัติแพ้รุนแรงแบบ SCARs / Anaphylaxis ให้หลีกเลี่ยง Sulfonamides ทั้งกลุ่ม (หากจำเป็นต้องใช้ให้ consult allergy)</div>`;
+      } else {
+        if (isCulpritATB && isTargetATB) {
+          html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 ห้ามสั่งใช้! ทั้งสองเป็น Sulfonamide ATBs มีโครงสร้าง N1 และ N4 Arylamine เหมือนกัน มีโอกาสแพ้ข้ามกลุ่มสูง</div>`;
+        } else if (isCulpritATB && !isTargetATB) {
+          html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ สามารถสั่งใช้ได้: ยาที่ต้องการสั่งใช้ เป็น Sulfonamide non-ATB ไม่มีโครงสร้าง N4 Arylamine เหมือน ATB สามารถใช้ได้ร่วมกับการสังเกตอาการอย่างใกล้ชิด</div>`;
+        } else {
+          html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ สามารถสั่งใช้ได้: โครงสร้างต่างกัน พ้นจากข้อห้ามแพ้ข้ามกลุ่ม</div>`;
+        }
+      }
+      html += `</div>`;
+
+      resultDiv.className = "p-4 rounded-xl border bg-slate-50 border-slate-300";
+      resultDiv.innerHTML = html;
+    }
+
+    function renderFluoroquinolones(container, data) {
+      container.innerHTML = `
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="bg-teal-100 text-teal-700 p-3 rounded-xl"><i class="fa-solid ${data.icon} text-xl"></i></div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">${data.name} Cross-Allergy Checker</h2>
+              <p class="text-xs text-slate-500">${data.desc}</p>
+            </div>
+          </div>
+
+          <!-- Dropdown Section -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">1. ยาที่ผู้ป่วยมีประวัติแพ้:</label>
+                <select id="culpritFQ" onchange="checkFQCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือก Fluoroquinolone ที่แพ้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">2. ยาที่ต้องการสั่งใช้:</label>
+                <select id="targetFQ" onchange="checkFQCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือก Fluoroquinolone ที่ต้องการใช้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">3. ระบุระดับความรุนแรงของอาการแพ้ (Severity Level):</label>
+              <select id="severityFQ" onchange="checkFQCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <option value="severe">แพ้รุนแรง (เช่น SJS, TEN, DRESS, AGEP, Anaphylaxis, Angioedema)</option>
+                <option value="nonSevere">แพ้แบบไม่รุนแรง (เช่น Urticaria, MP rash)</option>
+              </select>
+            </div>
+
+            <div id="fqHistoryBox" class="hidden">
+              <label class="block text-xs font-bold text-slate-700 mb-1">ประวัติการเคยใช้ยาที่ต้องการสั่งใช้:</label>
+              <select id="historyFQ" onchange="checkFQCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <option value="usedSafe">เคยใช้ได้ / ไม่แพ้</option>
+                <option value="neverUsed">ไม่เคยใช้ / แพ้ / ไม่มีข้อมูล</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="fqResult" class="hidden mb-6 p-4 rounded-xl border"></div>
+
+          <!-- Fluoroquinolones Reference Style Structure UI -->
+          <div class="mt-8 border-t border-slate-200 pt-6 space-y-4">
+            <h3 class="text-sm font-bold text-slate-700 flex items-center">
+              <i class="fa-solid fa-sitemap text-teal-600 mr-2"></i>Classification according to generation
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <!-- 1st Gen -->
+              <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
+                <h4 class="text-xs font-bold text-teal-800 border-b pb-1.5">1st Generation</h4>
+                <ul class="text-xs text-slate-600 space-y-1">
+                  <li>Nalidixic acid</li>
+                  <li>Cinoxacin</li>
+                  <li>Oxolinic acid</li>
+                  <li>Pipemidic acid</li>
+                </ul>
+              </div>
+
+              <!-- 2nd Gen -->
+              <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
+                <h4 class="text-xs font-bold text-teal-800 border-b pb-1.5">2nd Generation</h4>
+                <ul class="text-xs text-slate-600 space-y-1">
+                  <li>Norfloxacin*</li>
+                  <li>Enoxacin</li>
+                  <li>Ciprofloxacin*</li>
+                  <li>Lomefloxacin</li>
+                  <li>Ofloxacin*</li>
+                  <li>Pefloxacin</li>
+                  <li>Fleroxacin</li>
+                </ul>
+              </div>
+
+              <!-- 3rd Gen -->
+              <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
+                <h4 class="text-xs font-bold text-teal-800 border-b pb-1.5">3rd Generation</h4>
+                <ul class="text-xs text-slate-600 space-y-1">
+                  <li>Levofloxacin*</li>
+                  <li>Gatifloxacin</li>
+                  <li>Sparfloxacin</li>
+                </ul>
+              </div>
+
+              <!-- 4th Gen -->
+              <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
+                <h4 class="text-xs font-bold text-teal-800 border-b pb-1.5">4th Generation</h4>
+                <ul class="text-xs text-slate-600 space-y-1">
+                  <li>Gemifloxacin</li>
+                  <li>Moxifloxacin*</li>
+                  <li>Trovafloxacin</li>
+                  <li>Prulifloxacin</li>
+                  <li>Sitafloxacin*</li>
+                </ul>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-2">* คือรายการยาที่มีใน รพ.</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function checkFQCross() {
+      const culprit = document.getElementById("culpritFQ").value;
+      const target = document.getElementById("targetFQ").value;
+      const severity = document.getElementById("severityFQ").value;
+      const historyBox = document.getElementById("fqHistoryBox");
+      const history = document.getElementById("historyFQ").value;
+      const resultDiv = document.getElementById("fqResult");
+
+      if (!culprit || !target) { resultDiv.classList.add("hidden"); return; }
+      resultDiv.classList.remove("hidden");
+
+      if (severity === "nonSevere") {
+        historyBox.classList.remove("hidden");
+      } else {
+        historyBox.classList.add("hidden");
+      }
+
+      let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประเมิน Fluoroquinolones:</h4><div class="text-xs space-y-2">`;
+
+      if (severity === "severe") {
+        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 ห้ามสั่งใช้! ผู้ป่วยแพ้รุนแรง ต้องหลีกเลี่ยงยาที่แพ้และยาทุกตัวในกลุ่ม Fluoroquinolones เนื่องจากโครงสร้างหลักเหมือนกันมีโอกาสแพ้ข้ามกันสูงถึง 50%</div>`;
+      } else {
+        if (history === "usedSafe") {
+          html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ พิจารณาใช้ยาที่เคยใช้ได้: หลีกเลี่ยงยาที่เคยแพ้ แต่สามารถใช้ ${target} ที่เคยใช้ได้ โดยติดตามเฝ้าระวังผู้ป่วยอย่างใกล้ชิด</div>`;
+        } else {
+          html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 ห้ามสั่งใช้! หลีกเลี่ยงยาที่แพ้และยาทุกตัวในกลุ่ม (กรณีแพ้แบบ Immediate ต่อ Cipro/Moxi/Levo โอกาส cross-reactivity ต่ำแต่ยังแนะนำให้หลีกเลี่ยง)</div>`;
+        }
+      }
+      html += `</div>`;
+
+      resultDiv.className = "p-4 rounded-xl border bg-slate-50 border-slate-300";
+      resultDiv.innerHTML = html;
+    }
+
+    function renderAEDs(container, data) {
+      container.innerHTML = `
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="bg-teal-100 text-teal-700 p-3 rounded-xl"><i class="fa-solid ${data.icon} text-xl"></i></div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">${data.name} Cross-Allergy Assessment</h2>
+              <p class="text-xs text-slate-500">${data.desc}</p>
+            </div>
+          </div>
+
+          <!-- Dropdown Section -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">1. ยาที่ผู้ป่วยมีประวัติแพ้:</label>
+                <select id="culpritAED" onchange="checkAEDCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือกยากันชักที่แพ้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">2. ยาที่ต้องการสั่งใช้:</label>
+                <select id="targetAED" onchange="checkAEDCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือกยากันชักที่ต้องการใช้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">3. ระบุระดับความรุนแรงของอาการแพ้ (Severity Level):</label>
+              <select id="severityAED" onchange="checkAEDCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <option value="severe">แพ้รุนแรง (เช่น SJS, TEN, DRESS, AGEP, Anaphylaxis, Angioedema)</option>
+                <option value="nonSevere">แพ้แบบไม่รุนแรง (เช่น Urticaria, MP rash)</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="aedResult" class="hidden mb-6 p-4 rounded-xl border"></div>
+
+          <!-- AEDs Reference Style Structure UI -->
+          <div class="mt-8 border-t border-slate-200 pt-6 space-y-6">
+            <h3 class="text-sm font-bold text-slate-700 flex items-center">
+              <i class="fa-solid fa-sitemap text-teal-600 mr-2"></i>ตารางจำแนกยากันชัก
+            </h3>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Aromatic AEDs Box -->
+              <div class="bg-rose-50 border border-rose-200 rounded-xl p-4 shadow-sm space-y-3">
+                <h4 class="text-xs font-bold text-rose-800 flex items-center">
+                  <i class="fa-solid fa-hourglass-start text-rose-600 mr-1.5"></i>Aromatic AEDs
+                </h4>
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Carbamazepine</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Oxcarbazepine</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Phenobarbital</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Phenytoin</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Fosphenytoin</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Lamotrigine</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Zonisamide</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Perampanel</span>
+                  <span class="bg-white border border-rose-200 text-rose-800 text-xs px-2.5 py-1 rounded-md shadow-2xs">Lacosamide</span>
+                </div>
+                <div class="text-[11px] text-rose-900 bg-rose-100/70 p-2 rounded border border-rose-200 mt-2">
+                  <strong>การจัดการ:</strong> หลีกเลี่ยงยาที่แพ้และยาทุกตัวในกลุ่ม Aromatic AEDs -> พิจารณาใช้ยาทางเลือก
+                </div>
+              </div>
+
+              <!-- Non-aromatic AEDs Box -->
+              <div class="bg-sky-50 border border-sky-200 rounded-xl p-4 shadow-sm space-y-4">
+                <h4 class="text-xs font-bold text-sky-800 flex items-center">
+                  <i class="fa-solid fa-atom text-sky-600 mr-1.5"></i>Non-aromatic AEDs
+                </h4>
+
+                <div class="bg-white border border-sky-200 rounded-lg p-3 space-y-2 shadow-2xs">
+                  <span class="text-xs font-bold text-sky-900">โครงสร้างใกล้เคียงกัน:</span>
+                  <p class="text-xs text-sky-900/80">Clobazam, Clonazepam, Diazepam, Nitrazepam</p>
+                </div>
+
+                <div class="bg-white border border-sky-200 rounded-lg p-3 space-y-2 shadow-2xs">
+                  <span class="text-xs font-bold text-sky-900">โครงสร้างแตกต่างกัน:</span>
+                  <p class="text-xs text-sky-900/80">Levetiracetam, Sodium valproate, Topiramate, Gabapentin, Pregabalin, Vigabatrin, Rufinamide</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function checkAEDCross() {
+      const culprit = document.getElementById("culpritAED").value;
+      const target = document.getElementById("targetAED").value;
+      const severity = document.getElementById("severityAED").value;
+      const resultDiv = document.getElementById("aedResult");
+
+      if (!culprit || !target) { resultDiv.classList.add("hidden"); return; }
+      resultDiv.classList.remove("hidden");
+
+      const isCulpritAromatic = drugData.aeds.aromatic.includes(culprit);
+      const isTargetAromatic = drugData.aeds.aromatic.includes(target);
+
+      let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประเมินยากันชัก:</h4><div class="text-xs space-y-2">`;
+
+      if (target === "Carbamazepine") {
+        html += `<div class="bg-rose-600 text-white p-2.5 rounded-lg font-bold">🧬 คำเตือนสำคัญ: แนะนำให้ตรวจยีน HLA-B*1502 ก่อนเริ่มใช้ยา Carbamazepine เสมอ!</div>`;
+      }
+
+      if (isCulpritAromatic) {
+        if (isTargetAromatic) {
+          html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 ห้ามสั่งใช้! ทั้งสองเป็น Aromatic AEDs มีอัตราแพ้ข้ามกลุ่มสูง ให้หลีกเลี่ยงยาทุกตัวในกลุ่ม Aromatic AEDs และพิจารณาใช้ยาทางเลือก</div>`;
+        } else {
+          html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ สามารถพิจารณาใช้ได้: ยาที่ต้องการสั่งใช้ เป็น Non-aromatic AED (${target}) ไม่อยู่ในกลุ่มแพ้ข้ามของ Aromatic</div>`;
+        }
+      } else {
+        const isCulpritSimilar = drugData.aeds.nonAromaticSimilar.includes(culprit);
+        const isTargetSimilar = drugData.aeds.nonAromaticSimilar.includes(target);
+
+        if (isCulpritSimilar && isTargetSimilar) {
+          html += `<div class="bg-amber-100 text-amber-900 p-2.5 rounded-lg font-bold">⚠️ ยาในกลุ่มโครงสร้างใกล้เคียงกัน: หลีกเลี่ยงยาที่แพ้ หากจำเป็นต้องใช้ ${target} ให้ติดตามเฝ้าระวังผู้ป่วยอย่างใกล้ชิด</div>`;
+        } else {
+          html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ สามารถพิจารณาใช้ได้: โครงสร้างแตกต่างกันอย่างชัดเจน</div>`;
+        }
+      }
+      html += `</div>`;
+
+      resultDiv.className = "p-4 rounded-xl border bg-slate-50 border-slate-300";
+      resultDiv.innerHTML = html;
+    }
+
+    function renderICM(container, data) {
+      container.innerHTML = `
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="bg-teal-100 text-teal-700 p-3 rounded-xl"><i class="fa-solid ${data.icon} text-xl"></i></div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">${data.name} Cross-Allergy Checker</h2>
+              <p class="text-xs text-slate-500">${data.desc}</p>
+            </div>
+          </div>
+
+          <!-- Dropdown Section -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">1. สารทึบรังสีที่แพ้:</label>
+                <select id="culpritICM" onchange="checkICMCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือกรายการ ICM ที่แพ้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">2. สารทึบรังสีที่ต้องการใช้:</label>
+                <select id="targetICM" onchange="checkICMCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือกรายการ ICM ที่ต้องการใช้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">3. การประเมินระดับความเสี่ยงของผู้ป่วย (Risk Stratification):</label>
+              <select id="riskICM" onchange="checkICMCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <option value="high">High Risk (เคยแพ้รุนแรง Diffuse Urticaria, Angioedema, Anaphylaxis, SCARs หรือไม่ทราบประวัติ)</option>
+                <option value="intermediate">Intermediate Risk (เคยแพ้ไม่รุนแรง ผื่นคันเฉพาะที่, บวมบริเวณที่ฉีด, ตาแดง หรือเป็นหอบหืดคุมไม่ได้)</option>
+                <option value="low">Low Risk (คลื่นไส้ อาเจียน ตัวแดง ร้อนวูบวาบ หรือมีประวัติภูมิแพ้อื่นๆ/หอบหืดคุมได้ดี)</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="icmResult" class="hidden mb-6 p-4 rounded-xl border"></div>
+
+          <!-- ICM Reference Style UI -->
+          <div class="mt-8 border-t border-slate-200 pt-6 space-y-6">
+            <!-- Row 1: Classification & Mechanism -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <!-- Classification of ICM (Takes 2 cols) -->
+              <div class="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-4">
+                <h3 class="text-sm font-bold text-slate-700 flex items-center border-b pb-2">
+                  <i class="fa-solid fa-layer-group text-teal-600 mr-2"></i>Classification of ICM
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="bg-white border border-slate-200 rounded-lg p-3 space-y-1 shadow-2xs">
+                    <span class="text-xs font-bold text-teal-900">Monomerric High/Low Osmolality:</span>
+                    <p class="text-xs text-slate-600">Iothalamate, Iopanoic acid, Iotroxic acid, Diatrizoate, Iohexol*, Iopamidol*, Iopromide*, Iomeprol, Iobitridol*, Ioversol*, Ioxilan</p>
+                  </div>
+                  <div class="bg-white border border-slate-200 rounded-lg p-3 space-y-1 shadow-2xs">
+                    <span class="text-xs font-bold text-teal-900">Dimeric Low/Iso-osmolar:</span>
+                    <p class="text-xs text-slate-600">Ioxaglate, Iodixanol*</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mechanism Box (Takes 1 col) -->
+              <div class="bg-emerald-50/50 border border-emerald-200 rounded-xl p-4 shadow-sm space-y-2">
+                <h3 class="text-sm font-bold text-emerald-900 flex items-center border-b border-emerald-200 pb-2">
+                  <i class="fa-solid fa-shield-halved text-emerald-600 mr-2"></i>กลไการแพ้
+                </h3>
+                <ol class="text-xs text-emerald-950 space-y-2 list-decimal list-inside">
+                  <li><strong>Pseudoallergy:</strong> เกิดจาก ICM กระตุ้นการหลั่ง histamine/mediators โดยตรง (สามารถแพ้ได้ทุกตัวแม้มีโครงสร้างต่างกัน)</li>
+                  <li><strong>True allergy:</strong> เกิดจากร่างกายสร้าง IgE หรือ T-cell ที่จำเพาะกับ ICM (แพ้ได้ตัวใดตัวหนึ่ง หรือยาที่มีโครงสร้างคล้ายกัน)</li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Row 2: Cross Reactivity Table -->
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-4">
+              <h3 class="text-sm font-bold text-slate-700 flex items-center border-b pb-2">
+                <i class="fa-solid fa-chart-pie text-teal-600 mr-2"></i>รายงานการแพ้ข้ามกลุ่มของ ICM ในกลุ่มเดียวกัน
+              </h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-amber-50/60 border border-amber-200 rounded-lg p-3 space-y-2">
+                  <span class="text-xs font-bold text-amber-900 block">Group A (มี carbamoyl side chain เหมือนกัน มีโอกาสแพ้ข้ามกันได้)</span>
+                  <p class="text-xs text-slate-700">Iodixanol, iohexol, ioversol, iomeprol, iopamidol, iopromide</p>
+                  <p class="text-[11px] text-amber-800 italic">*มีข้อมูลว่า Iopamidol และ Ioversol มีโอกาสแพ้ข้ามกันน้อย</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-lg p-3 space-y-2">
+                  <span class="text-xs font-bold text-slate-900 block">Group B</span>
+                  <p class="text-xs text-slate-700">Iobitridol, ioxaglate</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-lg p-3 space-y-2">
+                  <span class="text-xs font-bold text-slate-900 block">Group C</span>
+                  <p class="text-xs text-slate-700">Amidotrizoate</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function checkICMCross() {
+      const culprit = document.getElementById("culpritICM").value;
+      const target = document.getElementById("targetICM").value;
+      const risk = document.getElementById("riskICM").value;
+      const resultDiv = document.getElementById("icmResult");
+
+      if (!culprit || !target) { resultDiv.classList.add("hidden"); return; }
+      resultDiv.classList.remove("hidden");
+
+      let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประเมินสารทึบรังสี (ICM):</h4><div class="text-xs space-y-2">`;
+
+      if (risk === "high") {
+        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 High Risk Management: 1. หลีกเลี่ยงการใช้ ICM 2. ใช้ imaging modality อื่นแทน 3. หากจำเป็นต้องใช้ ICM อย่างหลีกเลี่ยงไม่ได้ ให้ปรึกษา Allergy med/ped</div>`;
+      } else if (risk === "intermediate") {
+        html += `<div class="bg-amber-100 text-amber-900 p-2.5 rounded-lg font-bold">⚠️ Intermediate Risk Management: เปลี่ยนชนิด ICM (แนะนำเลือก ${target} ที่ต่างกลุ่มจาก ${culprit}) ร่วมกับการทำ Premedication ด้วย Antihistamine +/- Steroid อย่างน้อย 1 ชั่วโมง</div>`;
+      } else {
+        html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ Low Risk Management: สามารถให้คำแนะนำผู้ป่วย และใช้สารทึบรังสี ${target} ได้ตามปกติ</div>`;
+      }
+      html += `</div>`;
+
+      resultDiv.className = "p-4 rounded-xl border bg-slate-50 border-slate-300";
+      resultDiv.innerHTML = html;
+    }
+
+    function renderCorticosteroids(container, data) {
+      container.innerHTML = `
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="bg-teal-100 text-teal-700 p-3 rounded-xl"><i class="fa-solid ${data.icon} text-xl"></i></div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">${data.name} Allergy Assessment</h2>
+              <p class="text-xs text-slate-500">${data.desc}</p>
+            </div>
+          </div>
+
+          <!-- Dropdown Section -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">1. ยาที่ผู้ป่วยมีประวัติแพ้:</label>
+                <select id="culpritCortico" onchange="checkCorticoCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือก Corticosteroid ที่แพ้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">2. ยาที่ต้องการสั่งใช้:</label>
+                <select id="targetCortico" onchange="checkCorticoCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือก Corticosteroid ที่ต้องการใช้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">3. ระบุระดับความรุนแรงของอาการแพ้ (Severity Level):</label>
+              <select id="severityCortico" onchange="checkCorticoCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <option value="severe">SEVERE REACTION: anaphylaxis, angioedema (มี respiratory involvement), DRESS, SJS, TEN, AGEP</option>
+                <option value="mild">MILD REACTION: angioedema (ไม่มี respiratory involvement), MP rash, urticaria, pruritus</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="corticoResult" class="hidden mb-6 p-4 rounded-xl border"></div>
+
+          <!-- Corticosteroid Structure Cards Style -->
+          <div class="mt-8 border-t border-slate-200 pt-6 space-y-4">
+            <h3 class="text-sm font-bold text-slate-700 flex items-center">
+              <i class="fa-solid fa-sitemap text-teal-600 mr-2"></i>Glucocorticoid Chemical Classification (ตารางโครงสร้างกลุ่มสเตียรอยด์)
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-sm space-y-2">
+                <h4 class="text-xs font-bold text-teal-800 border-b pb-1">Group A<br><span class="text-[10px] font-normal text-slate-500">Hydrocortisone type</span></h4>
+                <ul class="text-[11px] text-slate-600 space-y-1 list-disc list-inside">
+                  <li>Hydrocortisone</li><li>Hydrocortisone acetate</li><li>Methylprednisolone</li><li>Prednisone</li><li>Prednisolone</li><li>Prednisolone acetate</li><li>Fludrocortisone acetate</li><li>Cortisone acetate</li>
+                </ul>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-sm space-y-2">
+                <h4 class="text-xs font-bold text-teal-800 border-b pb-1">Group B<br><span class="text-[10px] font-normal text-slate-500">Triamcinolone type</span></h4>
+                <ul class="text-[11px] text-slate-600 space-y-1 list-disc list-inside">
+                  <li>Triamcinolone Acetonide</li><li>Budesonide</li><li>Triamcinolone</li><li>Desonide</li><li>Fluocinonide</li><li>Fluocinolone acetonide</li><li>Flunisolide</li>
+                </ul>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-sm space-y-2">
+                <h4 class="text-xs font-bold text-teal-800 border-b pb-1">Group C<br><span class="text-[10px] font-normal text-slate-500">Betamethasone type</span></h4>
+                <ul class="text-[11px] text-slate-600 space-y-1 list-disc list-inside">
+                  <li>Betamethasone</li><li>Dexamethasone</li><li>Desoxymethasone</li><li>Fluocortolone</li><li>Fluticasone</li>
+                </ul>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-sm space-y-2">
+                <h4 class="text-xs font-bold text-teal-800 border-b pb-1">Group D1<br><span class="text-[10px] font-normal text-slate-500">Betamethasone dipropionate</span></h4>
+                <ul class="text-[11px] text-slate-600 space-y-1 list-disc list-inside">
+                  <li>Beclomethasone dipropionate</li><li>Betamethasone dipropionate</li><li>Clobetasol propionate</li><li>Mometasone furoate</li>
+                </ul>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-sm space-y-2">
+                <h4 class="text-xs font-bold text-teal-800 border-b pb-1">Group D2<br><span class="text-[10px] font-normal text-slate-500">Methylprednisolone aceponate</span></h4>
+                <ul class="text-[11px] text-slate-600 space-y-1 list-disc list-inside">
+                  <li>Methylprednisolone aceponate</li><li>Hydrocortisone valerate</li><li>Hydrocortisone-17-butyrate</li><li>Prednicarbate</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getCorticoGroup(drugName) {
+      const groups = drugData.corticosteroids.groups;
+      for (let g in groups) {
+        if (groups[g].includes(drugName)) return g;
+      }
+      return "Unknown";
+    }
+
+    function checkCorticoCross() {
+      const culprit = document.getElementById("culpritCortico").value;
+      const target = document.getElementById("targetCortico").value;
+      const severity = document.getElementById("severityCortico").value;
+      const resultDiv = document.getElementById("corticoResult");
+
+      if (!culprit || !target) { resultDiv.classList.add("hidden"); return; }
+      resultDiv.classList.remove("hidden");
+
+      const cGroup = getCorticoGroup(culprit);
+      const tGroup = getCorticoGroup(target);
+
+      let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประเมิน Systemic Corticosteroids:</h4><div class="text-xs space-y-2">`;
+      html += `<p>• <strong>ยาที่ผู้ป่วยมีประวัติแพ้ (${culprit}):</strong> จัดอยู่ใน <strong>${cGroup}</strong></p>`;
+      html += `<p>• <strong>ยาที่ต้องการสั่งใช้ (${target}):</strong> จัดอยู่ใน <strong>${tGroup}</strong></p>`;
+
+      if (severity === "severe") {
+        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 SEVERE REACTION: หลีกเลี่ยงยาที่แพ้และเลี่ยงทุกกลุ่ม systemic corticosteroids (*หากมีความจำเป็นต้องใช้ แนะนำปรึกษาแพทย์ภูมิคุ้มกัน)</div>`;
+      } else {
+        if (cGroup === tGroup) {
+          html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 กลุ่มเดียวกัน: ผู้ป่วยอยู่ในกลุ่ม ${cGroup} เหมือนกัน มีโอกาสแพ้ข้ามกลุ่มสูง ให้เลี่ยงไปใช้ต่างกลุ่ม</div>`;
+        } else {
+          html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ MILD REACTION Management: หลีกเลี่ยงยาที่แพ้ และพิจารณา systemic corticosteroids ต่าง group กัน (อาจเลือกใช้ Group C เนื่องจากรายงานการแพ้ข้ามต่ำที่สุด)</div>`;
+        }
+      }
+      html += `</div>`;
+
+      resultDiv.className = "p-4 rounded-xl border bg-slate-50 border-slate-300";
+      resultDiv.innerHTML = html;
+    }
+
+    function renderPPIs(container, data) {
+      container.innerHTML = `
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="bg-teal-100 text-teal-700 p-3 rounded-xl"><i class="fa-solid ${data.icon} text-xl"></i></div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">${data.name} Allergy Assessment</h2>
+              <p class="text-xs text-slate-500">${data.desc}</p>
+            </div>
+          </div>
+
+          <!-- Dropdown Section -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">1. ยาที่ผู้ป่วยมีประวัติแพ้:</label>
+                <select id="culpritPPI" onchange="checkPPICross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือกรายการ PPIs ที่แพ้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">2. ยาที่ต้องการสั่งใช้:</label>
+                <select id="targetPPI" onchange="checkPPICross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือกรายการ PPIs ที่ต้องการใช้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">3. ระบุระดับความรุนแรงของอาการแพ้ (Severity Level):</label>
+              <select id="severityPPI" onchange="checkPPICross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <option value="severe">SEVERE REACTION: anaphylaxis, angioedema (มี respiratory involvement), DRESS, SJS, TEN, AGEP</option>
+                <option value="mild">MILD REACTION: angioedema (ไม่มี respiratory involvement), MP rash, urticaria, pruritus</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="ppiResult" class="hidden mb-6 p-4 rounded-xl border"></div>
+
+          <!-- PPIs Cards Style -->
+          <div class="mt-8 border-t border-slate-200 pt-6 space-y-4">
+            <h3 class="text-sm font-bold text-slate-700 flex items-center">
+              <i class="fa-solid fa-sitemap text-teal-600 mr-2"></i>Proton Pump Inhibitors (PPIs) Structure
+            </h3>
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
+              <h4 class="text-xs font-bold text-teal-800">Benzimidazole Ring + Pyridine Ring</h4>
+              <p class="text-xs text-slate-600">ยาทุกตัวมีโครงสร้างหลักคล้ายกันมาก (Omeprazole, Esomeprazole, Lansoprazole, Pantoprazole, Rabeprazole)</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function checkPPICross() {
+      const culprit = document.getElementById("culpritPPI").value;
+      const target = document.getElementById("targetPPI").value;
+      const severity = document.getElementById("severityPPI").value;
+      const resultDiv = document.getElementById("ppiResult");
+
+      if (!culprit || !target) { resultDiv.classList.add("hidden"); return; }
+      resultDiv.classList.remove("hidden");
+
+      let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประเมิน Proton Pump Inhibitors (PPIs):</h4><div class="text-xs space-y-2">`;
+      html += `<p>• ยาทุกตัวในกลุ่ม PPIs มีโครงสร้างหลักที่เหมือนกัน (Benzimidazole + Pyridine) มีรายงานการแพ้ข้ามกันที่หลากหลาย</p>`;
+
+      if (severity === "severe") {
+        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 SEVERE REACTION: หลีกเลี่ยงยา PPIs ทั้งกลุ่ม พิจารณาใช้ยาทางเลือกอื่น (เช่น H2-receptor antagonists / Antacids) *หากมีความจำเป็นต้องใช้ แนะนำปรึกษาแพทย์ภูมิคุ้มกัน</div>`;
+      } else {
+        if (culprit === target) {
+          html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 ห้ามสั่งใช้ยาตัวเดียวกัน! (${target})</div>`;
+        } else {
+          html += `<div class="bg-amber-100 text-amber-900 p-2.5 rounded-lg font-bold border border-amber-300">⚠️ MILD REACTION: หลีกเลี่ยงยา PPI ทั้งกลุ่ม หรือ ถ้าจำเป็นต้องใช้ เลือกยาคนละชนิด (${target}) และเฝ้าระวังผู้ป่วยหลังใช้ หรือ เลือกยาทางเลือกอื่น</div>`;
+        }
+      }
+      html += `</div>`;
+
+      resultDiv.className = "p-4 rounded-xl border bg-slate-50 border-slate-300";
+      resultDiv.innerHTML = html;
+    }
+
+    function renderAntihistamines(container, data) {
+      container.innerHTML = `
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="bg-teal-100 text-teal-700 p-3 rounded-xl"><i class="fa-solid ${data.icon} text-xl"></i></div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">${data.name} Cross-Allergy Assessment</h2>
+              <p class="text-xs text-slate-500">${data.desc}</p>
+            </div>
+          </div>
+
+          <!-- Dropdown Section -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">1. ยาที่ผู้ป่วยมีประวัติแพ้:</label>
+                <select id="culpritAH" onchange="checkAHCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือก Antihistamine ที่แพ้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">2. ยาที่ต้องการสั่งใช้:</label>
+                <select id="targetAH" onchange="checkAHCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือก Antihistamine ที่ต้องการใช้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">3. ระบุระดับความรุนแรงของอาการแพ้ (Severity Level):</label>
+              <select id="severityAH" onchange="checkAHCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <option value="severe">SEVERE REACTION: anaphylaxis, angioedema (มี respiratory involvement), DRESS, SJS, TEN, AGEP</option>
+                <option value="mild">MILD REACTION: angioedema (ไม่มี respiratory involvement), MP rash, urticaria, pruritus</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="ahResult" class="hidden mb-6 p-4 rounded-xl border"></div>
+
+          <!-- Antihistamines Groups UI -->
+          <div class="mt-8 border-t border-slate-200 pt-6 space-y-4">
+            <h3 class="text-sm font-bold text-slate-700 flex items-center">
+              <i class="fa-solid fa-sitemap text-teal-600 mr-2"></i>H1-Antagonists Chemical Groups
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              ${Object.keys(data.chemicalGroups).map(g => `
+                <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-sm space-y-1">
+                  <h4 class="text-xs font-bold text-teal-800">${g}</h4>
+                  <p class="text-[11px] text-slate-600">${data.chemicalGroups[g].join(", ")}</p>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function getAHGroup(drugName) {
+      const groups = drugData.antihistamines.chemicalGroups;
+      for (let g in groups) {
+        if (groups[g].includes(drugName)) return g;
+      }
+      return "Unknown";
+    }
+
+    function checkAHCross() {
+      const culprit = document.getElementById("culpritAH").value;
+      const target = document.getElementById("targetAH").value;
+      const severity = document.getElementById("severityAH").value;
+      const resultDiv = document.getElementById("ahResult");
+
+      if (!culprit || !target) { resultDiv.classList.add("hidden"); return; }
+      resultDiv.classList.remove("hidden");
+
+      const cGroup = getAHGroup(culprit);
+      const tGroup = getAHGroup(target);
+
+      let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประเมิน H1-Antagonists:</h4><div class="text-xs space-y-2">`;
+      html += `<p>• <strong>ยาที่ผู้ป่วยมีประวัติแพ้ (${culprit}):</strong> จัดอยู่ในกลุ่ม <strong>${cGroup}</strong></p>`;
+      html += `<p>• <strong>ยาที่ต้องการสั่งใช้ (${target}):</strong> จัดอยู่ในกลุ่ม <strong>${tGroup}</strong></p>`;
+
+      if (severity === "severe") {
+        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 SEVERE REACTION: หลีกเลี่ยงยาที่แพ้และเลี่ยงทุกกลุ่ม Antihistamines (*หากมีความจำเป็นต้องใช้ แนะนำปรึกษาแพทย์ภูมิคุ้มกัน)</div>`;
+      } else {
+        if (cGroup === tGroup) {
+          html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 กลุ่มเคมีเดียวกัน: (${cGroup}) มีความเสี่ยงแพ้ข้ามกลุ่มสูง ให้เลี่ยงไปใช้ยาต่างกลุ่มเคมี</div>`;
+        } else {
+          html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ MILD REACTION Management: หลีกเลี่ยงยาที่แพ้ และสามารถใช้ Antihistamines จากกลุ่มเคมีอื่น (${tGroup}) ได้อย่างปลอดภัย</div>`;
+        }
+      }
+      html += `</div>`;
+
+      resultDiv.className = "p-4 rounded-xl border bg-slate-50 border-slate-300";
+      resultDiv.innerHTML = html;
+    }
+
+    function renderMuscleRelaxants(container, data) {
+      container.innerHTML = `
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="bg-teal-100 text-teal-700 p-3 rounded-xl"><i class="fa-solid ${data.icon} text-xl"></i></div>
+            <div>
+              <h2 class="text-lg font-bold text-slate-800">${data.name} Assessment</h2>
+              <p class="text-xs text-slate-500">${data.desc}</p>
+            </div>
+          </div>
+
+          <!-- Dropdown Section -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">1. ยาที่ผู้ป่วยมีประวัติแพ้:</label>
+                <select id="culpritMR" onchange="checkMRCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือก Muscle Relaxant ที่แพ้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">2. ยาที่ต้องการสั่งใช้:</label>
+                <select id="targetMR" onchange="checkMRCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                  <option value="">-- เลือก Muscle Relaxant ที่ต้องการใช้ --</option>
+                  ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">3. ระบุระดับความรุนแรงของอาการแพ้ (Severity Level):</label>
+              <select id="severityMR" onchange="checkMRCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <option value="severe">SEVERE REACTION: anaphylaxis, angioedema (มี respiratory involvement), DRESS, SJS, TEN, AGEP</option>
+                <option value="mild">MILD REACTION: angioedema (ไม่มี respiratory involvement), MP rash, urticaria, pruritus</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="mrResult" class="hidden mb-6 p-4 rounded-xl border"></div>
+
+          <!-- MR Info Box -->
+          <div class="mt-8 border-t border-slate-200 pt-6 space-y-4">
+            <h3 class="text-sm font-bold text-slate-700 flex items-center">
+              <i class="fa-solid fa-sitemap text-teal-600 mr-2"></i>Oral Muscle Relaxants Guidance
+            </h3>
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
+              <h4 class="text-xs font-bold text-teal-800">โครงสร้างกลุ่มยาคลายกล้ามเนื้อ</h4>
+              <p class="text-xs text-slate-600">Tolperisone, Eperisone และ Orphenadrine มีโครงสร้างเคมีที่แตกต่างกัน สามารถพิจารณาเปลี่ยนกลุ่มได้หากไม่มีประวัติแพ้รุนแรงร่วมด้วย</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function checkMRCross() {
+      const culprit = document.getElementById("culpritMR").value;
+      const target = document.getElementById("targetMR").value;
+      const severity = document.getElementById("severityMR").value;
+      const resultDiv = document.getElementById("mrResult");
+
+      if (!culprit || !target) { resultDiv.classList.add("hidden"); return; }
+      resultDiv.classList.remove("hidden");
+
+      let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประเมิน Muscle Relaxants:</h4><div class="text-xs space-y-2">`;
+
+      if (severity === "severe") {
+        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 SEVERE REACTION: หลีกเลี่ยงยาคลายกล้ามเนื้อกลุ่มนี้ทั้งหมด</div>`;
+      } else {
+        if (culprit === target) {
+          html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 ห้ามใช้ยาตัวเดียวกัน (${target})</div>`;
+        } else {
+          html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ สามารถพิจารณาใช้ได้: ${target} มีโครงสร้างต่างจาก ${culprit} และผู้ป่วยมีอาการแพ้ไม่รุนแรง</div>`;
+        }
+      }
+      html += `</div>`;
+
+      resultDiv.className = "p-4 rounded-xl border bg-slate-50 border-slate-300";
+      resultDiv.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
