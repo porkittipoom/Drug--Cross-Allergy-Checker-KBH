@@ -211,7 +211,7 @@
           "Brompheniramine", "Chlorpheniramine", "Dexchlorpheniramine", "Pheniramine", "Dimethindene", "Triprolidine", "Acrivastine",
           "Carbinoxamine", "Clemastine", "Dimenhydrinate", "Diphenhydramine", "Doxylamine",
           "Antazoline", "Pyrilamine", "Tripelename",
-          "Buclizine", "Cyclizine", "Meclizine", "Oxatomide", "Hydroxyzine", "Cetirizine", "Levocetirizine",
+          "Buclizine", "Cyclizine", "Meclizine", "Oxatomide", "Hydrohydroxyzine", "Cetirizine", "Levocetirizine",
           "Promethazine", "Mequitazine", "Trimeprazine",
           "Azatadine", "Ketotifen", "Cyproheptadine", "Loratadine", "Ebastine", "Terfenadine", "Levocabastine", "Mizolastine", "Rupatadine", "Desloratadine", "Bilastine", "Fexofenadine"
         ],
@@ -283,12 +283,14 @@
     function renderBetaLactam(container, data) {
       const drugs = data.drugs;
       
+      // Sticky header row for matrix
       let matrixHeader = `<tr class="bg-teal-800 text-white"><th class="p-2 border border-teal-700 bg-teal-800 text-white sticky top-0 left-0 z-30 min-w-[120px] text-center shadow"></th>`;
       drugs.forEach(d => {
         matrixHeader += `<th class="p-2 border border-teal-700 bg-teal-700 text-white text-[10px] font-bold whitespace-nowrap min-w-[75px] text-center sticky top-0 z-20">${d}</th>`;
       });
       matrixHeader += `</tr>`;
 
+      // Sticky first column for matrix rows
       let matrixBody = "";
       drugs.forEach(culprit => {
         matrixBody += `<tr><td class="p-2 border border-slate-200 bg-teal-700 text-white font-bold text-[10px] whitespace-nowrap sticky left-0 z-20 shadow-sm">${culprit}</td>`;
@@ -733,11 +735,11 @@
               <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
                 <h4 class="text-xs font-bold text-teal-800 border-b pb-1.5">2nd Generation</h4>
                 <ul class="text-xs text-slate-600 space-y-1">
-                  <li>Norfloxacin*</li>
+                  <li>Norfloxacin</li>
                   <li>Enoxacin</li>
-                  <li>Ciprofloxacin*</li>
+                  <li>Ciprofloxacin</li>
                   <li>Lomefloxacin</li>
-                  <li>Ofloxacin*</li>
+                  <li>Ofloxacin</li>
                   <li>Pefloxacin</li>
                   <li>Fleroxacin</li>
                 </ul>
@@ -747,7 +749,7 @@
               <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
                 <h4 class="text-xs font-bold text-teal-800 border-b pb-1.5">3rd Generation</h4>
                 <ul class="text-xs text-slate-600 space-y-1">
-                  <li>Levofloxacin*</li>
+                  <li>Levofloxacin</li>
                   <li>Gatifloxacin</li>
                   <li>Sparfloxacin</li>
                 </ul>
@@ -758,14 +760,13 @@
                 <h4 class="text-xs font-bold text-teal-800 border-b pb-1.5">4th Generation</h4>
                 <ul class="text-xs text-slate-600 space-y-1">
                   <li>Gemifloxacin</li>
-                  <li>Moxifloxacin*</li>
+                  <li>Moxifloxacin</li>
                   <li>Trovafloxacin</li>
                   <li>Prulifloxacin</li>
-                  <li>Sitafloxacin*</li>
+                  <li>Sitafloxacin</li>
                 </ul>
               </div>
             </div>
-            <p class="text-[11px] text-slate-500 mt-2">* คือรายการยาที่มีใน รพ.</p>
           </div>
         </div>
       `;
@@ -990,11 +991,11 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div class="bg-white border border-slate-200 rounded-lg p-3 space-y-1 shadow-2xs">
                     <span class="text-xs font-bold text-teal-900">Monomerric High/Low Osmolality:</span>
-                    <p class="text-xs text-slate-600">Iothalamate, Iopanoic acid, Iotroxic acid, Diatrizoate, Iohexol*, Iopamidol*, Iopromide*, Iomeprol, Iobitridol*, Ioversol*, Ioxilan</p>
+                    <p class="text-xs text-slate-600">Iothalamate, Iopanoic acid, Iotroxic acid, Diatrizoate, Iohexol, Iopamidol, Iopromide, Iomeprol, Iobitridol, Ioversol, Ioxilan</p>
                   </div>
                   <div class="bg-white border border-slate-200 rounded-lg p-3 space-y-1 shadow-2xs">
                     <span class="text-xs font-bold text-teal-900">Dimeric Low/Iso-osmolar:</span>
-                    <p class="text-xs text-slate-600">Ioxaglate, Iodixanol*</p>
+                    <p class="text-xs text-slate-600">Ioxaglate, Iodixanol</p>
                   </div>
                 </div>
               </div>
@@ -1251,16 +1252,11 @@
       resultDiv.classList.remove("hidden");
 
       let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประเมิน Proton Pump Inhibitors (PPIs):</h4><div class="text-xs space-y-2">`;
-      html += `<p>• ยาทุกตัวในกลุ่ม PPIs มีโครงสร้างหลักที่เหมือนกัน (Benzimidazole + Pyridine) มีรายงานการแพ้ข้ามกันที่หลากหลาย</p>`;
 
       if (severity === "severe") {
-        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 SEVERE REACTION: หลีกเลี่ยงยา PPIs ทั้งกลุ่ม พิจารณาใช้ยาทางเลือกอื่น (เช่น H2-receptor antagonists / Antacids) *หากมีความจำเป็นต้องใช้ แนะนำปรึกษาแพทย์ภูมิคุ้มกัน</div>`;
+        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 SEVERE REACTION: หลีกเลี่ยงยาทุกตัวในกลุ่ม PPIs เนื่องจากโครงสร้างเคมีใกล้เคียงกันมาก ควรพิจารณาใช้ยาลดกรดกลุ่มอื่น เช่น H2-receptor antagonists (H2RAs) แทน</div>`;
       } else {
-        if (culprit === target) {
-          html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 ห้ามสั่งใช้ยาตัวเดียวกัน! (${target})</div>`;
-        } else {
-          html += `<div class="bg-amber-100 text-amber-900 p-2.5 rounded-lg font-bold border border-amber-300">⚠️ MILD REACTION: หลีกเลี่ยงยา PPI ทั้งกลุ่ม หรือ ถ้าจำเป็นต้องใช้ เลือกยาคนละชนิด (${target}) และเฝ้าระวังผู้ป่วยหลังใช้ หรือ เลือกยาทางเลือกอื่น</div>`;
-        }
+        html += `<div class="bg-amber-100 text-amber-900 p-2.5 rounded-lg font-bold border border-amber-300">⚠️ MILD REACTION: ยาในกลุ่ม PPIs มีโครงสร้างคล้ายคลึงกันสูง อาจมีความเสี่ยงแพ้ข้ามกลุ่ม หากจำเป็นต้องใช้ ควรพิจารณาเปลี่ยนตัวยาและสังเกตอาการอย่างใกล้ชิด หรือใช้ H2RAs แทน</div>`;
       }
       html += `</div>`;
 
@@ -1274,7 +1270,7 @@
           <div class="flex items-center space-x-3 mb-4">
             <div class="bg-teal-100 text-teal-700 p-3 rounded-xl"><i class="fa-solid ${data.icon} text-xl"></i></div>
             <div>
-              <h2 class="text-lg font-bold text-slate-800">${data.name} Cross-Allergy Assessment</h2>
+              <h2 class="text-lg font-bold text-slate-800">${data.name} Cross-Allergy Checker</h2>
               <p class="text-xs text-slate-500">${data.desc}</p>
             </div>
           </div>
@@ -1284,41 +1280,35 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">1. ยาที่ผู้ป่วยมีประวัติแพ้:</label>
-                <select id="culpritAH" onchange="checkAHCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <select id="culpritAnti" onchange="checkAntihistamineCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
                   <option value="">-- เลือก Antihistamine ที่แพ้ --</option>
                   ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
                 </select>
               </div>
               <div>
                 <label class="block text-xs font-bold text-slate-700 mb-1">2. ยาที่ต้องการสั่งใช้:</label>
-                <select id="targetAH" onchange="checkAHCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
+                <select id="targetAnti" onchange="checkAntihistamineCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
                   <option value="">-- เลือก Antihistamine ที่ต้องการใช้ --</option>
                   ${data.drugs.map(d => `<option value="${d}">${d}</option>`).join("")}
                 </select>
               </div>
             </div>
-
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">3. ระบุระดับความรุนแรงของอาการแพ้ (Severity Level):</label>
-              <select id="severityAH" onchange="checkAHCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
-                <option value="severe">SEVERE REACTION: anaphylaxis, angioedema (มี respiratory involvement), DRESS, SJS, TEN, AGEP</option>
-                <option value="mild">MILD REACTION: angioedema (ไม่มี respiratory involvement), MP rash, urticaria, pruritus</option>
-              </select>
-            </div>
           </div>
 
-          <div id="ahResult" class="hidden mb-6 p-4 rounded-xl border"></div>
+          <div id="antiResult" class="hidden mb-6 p-4 rounded-xl border"></div>
 
-          <!-- Antihistamines Groups UI -->
+          <!-- Antihistamines Classification Structure -->
           <div class="mt-8 border-t border-slate-200 pt-6 space-y-4">
             <h3 class="text-sm font-bold text-slate-700 flex items-center">
-              <i class="fa-solid fa-sitemap text-teal-600 mr-2"></i>H1-Antagonists Chemical Groups
+              <i class="fa-solid fa-sitemap text-teal-600 mr-2"></i>H1-Antagonists Chemical Classification
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              ${Object.keys(data.chemicalGroups).map(g => `
-                <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-sm space-y-1">
-                  <h4 class="text-xs font-bold text-teal-800">${g}</h4>
-                  <p class="text-[11px] text-slate-600">${data.chemicalGroups[g].join(", ")}</p>
+              ${Object.keys(data.chemicalGroups).map(group => `
+                <div class="bg-white border border-slate-200 rounded-xl p-3 shadow-sm space-y-2">
+                  <h4 class="text-xs font-bold text-teal-800 border-b pb-1">${group}</h4>
+                  <ul class="text-[11px] text-slate-600 space-y-1 list-disc list-inside">
+                    ${data.chemicalGroups[group].map(item => `<li>${item}</li>`).join("")}
+                  </ul>
                 </div>
               `).join("")}
             </div>
@@ -1327,7 +1317,7 @@
       `;
     }
 
-    function getAHGroup(drugName) {
+    function getAntihistamineGroup(drugName) {
       const groups = drugData.antihistamines.chemicalGroups;
       for (let g in groups) {
         if (groups[g].includes(drugName)) return g;
@@ -1335,30 +1325,25 @@
       return "Unknown";
     }
 
-    function checkAHCross() {
-      const culprit = document.getElementById("culpritAH").value;
-      const target = document.getElementById("targetAH").value;
-      const severity = document.getElementById("severityAH").value;
-      const resultDiv = document.getElementById("ahResult");
+    function checkAntihistamineCross() {
+      const culprit = document.getElementById("culpritAnti").value;
+      const target = document.getElementById("targetAnti").value;
+      const resultDiv = document.getElementById("antiResult");
 
       if (!culprit || !target) { resultDiv.classList.add("hidden"); return; }
       resultDiv.classList.remove("hidden");
 
-      const cGroup = getAHGroup(culprit);
-      const tGroup = getAHGroup(target);
+      const cGroup = getAntihistamineGroup(culprit);
+      const tGroup = getAntihistamineGroup(target);
 
       let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประเมิน H1-Antagonists:</h4><div class="text-xs space-y-2">`;
-      html += `<p>• <strong>ยาที่ผู้ป่วยมีประวัติแพ้ (${culprit}):</strong> จัดอยู่ในกลุ่ม <strong>${cGroup}</strong></p>`;
-      html += `<p>• <strong>ยาที่ต้องการสั่งใช้ (${target}):</strong> จัดอยู่ในกลุ่ม <strong>${tGroup}</strong></p>`;
+      html += `<p>• <strong>ยาที่ผู้ป่วยมีประวัติแพ้ (${culprit}):</strong> กลุ่มโครงสร้าง chemical <em>${cGroup}</em></p>`;
+      html += `<p>• <strong>ยาที่ต้องการสั่งใช้ (${target}):</strong> กลุ่มโครงสร้าง chemical <em>${tGroup}</em></p>`;
 
-      if (severity === "severe") {
-        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 SEVERE REACTION: หลีกเลี่ยงยาที่แพ้และเลี่ยงทุกกลุ่ม Antihistamines (*หากมีความจำเป็นต้องใช้ แนะนำปรึกษาแพทย์ภูมิคุ้มกัน)</div>`;
+      if (cGroup === tGroup) {
+        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 กลุ่มโครงสร้างเดียวกัน: ผู้ป่วยอยู่ในกลุ่ม ${cGroup} มีความเสี่ยงต่อการแพ้ข้ามกลุ่ม แนะนำให้พิจารณาเลือกใช้ยาในกลุ่มโครงสร้างอื่น</div>`;
       } else {
-        if (cGroup === tGroup) {
-          html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 กลุ่มเคมีเดียวกัน: (${cGroup}) มีความเสี่ยงแพ้ข้ามกลุ่มสูง ให้เลี่ยงไปใช้ยาต่างกลุ่มเคมี</div>`;
-        } else {
-          html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ MILD REACTION Management: หลีกเลี่ยงยาที่แพ้ และสามารถใช้ Antihistamines จากกลุ่มเคมีอื่น (${tGroup}) ได้อย่างปลอดภัย</div>`;
-        }
+        html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ ต่างกลุ่มโครงสร้าง: ยาอยู่ในกลุ่มโครงสร้างสารเคมีต่างกัน (${cGroup} vs ${tGroup}) สามารถพิจารณาสั่งใช้ได้</div>`;
       }
       html += `</div>`;
 
@@ -1372,7 +1357,7 @@
           <div class="flex items-center space-x-3 mb-4">
             <div class="bg-teal-100 text-teal-700 p-3 rounded-xl"><i class="fa-solid ${data.icon} text-xl"></i></div>
             <div>
-              <h2 class="text-lg font-bold text-slate-800">${data.name} Assessment</h2>
+              <h2 class="text-lg font-bold text-slate-800">${data.name} Cross-Allergy Checker</h2>
               <p class="text-xs text-slate-500">${data.desc}</p>
             </div>
           </div>
@@ -1395,26 +1380,24 @@
                 </select>
               </div>
             </div>
-
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">3. ระบุระดับความรุนแรงของอาการแพ้ (Severity Level):</label>
-              <select id="severityMR" onchange="checkMRCross()" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500">
-                <option value="severe">SEVERE REACTION: anaphylaxis, angioedema (มี respiratory involvement), DRESS, SJS, TEN, AGEP</option>
-                <option value="mild">MILD REACTION: angioedema (ไม่มี respiratory involvement), MP rash, urticaria, pruritus</option>
-              </select>
-            </div>
           </div>
 
           <div id="mrResult" class="hidden mb-6 p-4 rounded-xl border"></div>
 
-          <!-- MR Info Box -->
+          <!-- Muscle Relaxants Chemical Structure -->
           <div class="mt-8 border-t border-slate-200 pt-6 space-y-4">
             <h3 class="text-sm font-bold text-slate-700 flex items-center">
-              <i class="fa-solid fa-sitemap text-teal-600 mr-2"></i>Oral Muscle Relaxants Guidance
+              <i class="fa-solid fa-sitemap text-teal-600 mr-2"></i>Oral Muscle Relaxants Classification
             </h3>
-            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
-              <h4 class="text-xs font-bold text-teal-800">โครงสร้างกลุ่มยาคลายกล้ามเนื้อ</h4>
-              <p class="text-xs text-slate-600">Tolperisone, Eperisone และ Orphenadrine มีโครงสร้างเคมีที่แตกต่างกัน สามารถพิจารณาเปลี่ยนกลุ่มได้หากไม่มีประวัติแพ้รุนแรงร่วมด้วย</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
+                <h4 class="text-xs font-bold text-teal-800 border-b pb-1">Piperidine Derivatives</h4>
+                <p class="text-xs text-slate-600">Tolperisone, Eperisone</p>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-2">
+                <h4 class="text-xs font-bold text-teal-800 border-b pb-1">Ethanolamine Derivatives</h4>
+                <p class="text-xs text-slate-600">Orphenadrine</p>
+              </div>
             </div>
           </div>
         </div>
@@ -1424,22 +1407,20 @@
     function checkMRCross() {
       const culprit = document.getElementById("culpritMR").value;
       const target = document.getElementById("targetMR").value;
-      const severity = document.getElementById("severityMR").value;
       const resultDiv = document.getElementById("mrResult");
 
       if (!culprit || !target) { resultDiv.classList.add("hidden"); return; }
       resultDiv.classList.remove("hidden");
 
-      let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประเมิน Muscle Relaxants:</h4><div class="text-xs space-y-2">`;
+      const isCulpritPip = (culprit === "Tolperisone" || culprit === "Eperisone");
+      const isTargetPip = (target === "Tolperisone" || target === "Eperisone");
 
-      if (severity === "severe") {
-        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 SEVERE REACTION: หลีกเลี่ยงยาคลายกล้ามเนื้อกลุ่มนี้ทั้งหมด</div>`;
+      let html = `<h4 class="font-bold text-sm mb-2"><i class="fa-solid fa-calculator mr-1.5"></i>ผลการประเมิน Oral Muscle Relaxants:</h4><div class="text-xs space-y-2">`;
+
+      if (isCulpritPip && isTargetPip) {
+        html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 กลุ่ม Piperidine เหมือนกัน: ${culprit} และ ${target} เป็นอนุพันธ์ Piperidine derivatives เหมือนกัน มีโอกาสแพ้ข้ามกลุ่มสูง ให้หลีกเลี่ยง</div>`;
       } else {
-        if (culprit === target) {
-          html += `<div class="bg-rose-100 text-rose-900 p-2.5 rounded-lg font-bold border border-rose-300">🚨 ห้ามใช้ยาตัวเดียวกัน (${target})</div>`;
-        } else {
-          html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ สามารถพิจารณาใช้ได้: ${target} มีโครงสร้างต่างจาก ${culprit} และผู้ป่วยมีอาการแพ้ไม่รุนแรง</div>`;
-        }
+        html += `<div class="bg-emerald-100 text-emerald-900 p-2.5 rounded-lg font-bold">✅ คนละกลุ่มโครงสร้าง: ${culprit} และ ${target} อยู่คนละอนุพันธ์ทางเคมี สามารถพิจารณาสั่งใช้ได้</div>`;
       }
       html += `</div>`;
 
